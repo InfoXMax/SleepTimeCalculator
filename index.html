@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleep Time Calculator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>Sleep Time Calculator</h1>
+
+    <div class="container">
+        <label for="wakeUpTime">Wake Up Time:</label>
+        <input type="time" id="wakeUpTime" required>
+        
+        <label for="sleepHours">Sleep Duration (hours):</label>
+        <input type="number" id="sleepHours" min="1" max="12" required>
+
+        <button onclick="calculateSleepTime()">Calculate Sleep Time</button>
+        
+        <div id="sleepTime"></div>
+        <div id="countdown"></div>
+    </div>
+
+    <script>
+        let countdownInterval;
+
+        function calculateSleepTime() {
+            clearInterval(countdownInterval);
+
+            const wakeUpTime = document.getElementById('wakeUpTime').value;
+            const sleepHours = parseInt(document.getElementById('sleepHours').value);
+
+            if (!wakeUpTime || isNaN(sleepHours)) {
+                alert("Please enter both wake-up time and sleep duration.");
+                return;
+            }
+
+            const [wakeHour, wakeMinute] = wakeUpTime.split(':').map(Number);
+            const wakeUpDate = new Date();
+            wakeUpDate.setHours(wakeHour, wakeMinute, 0, 0);
+
+            const sleepTime = new Date(wakeUpDate.getTime() - sleepHours * 60 * 60 * 1000);
+
+            // Adjust sleep time to tomorrow if sleep time has already passed today
+            const currentTime = new Date();
+            if (sleepTime < currentTime) {
+                sleepTime.setDate(sleepTime.getDate() + 1);
+            }
+
+            const sleepHour = sleepTime.getHours().toString().padStart(2, '0');
+            const sleepMinute = sleepTime.getMinutes().toString().padStart(2, '0');
+            document.getElementById('sleepTime').textContent = `You should sleep at: ${sleepHour}:${sleepMinute}`;
+
+            const timeDifference = sleepTime.getTime() - currentTime.getTime();
+            startCountdown(timeDifference);
+        }
+
+        function startCountdown(milliseconds) {
+            countdownInterval = setInterval(() => {
+                milliseconds -= 1000;
+                if (milliseconds <= 0) {
+                    clearInterval(countdownInterval);
+                    document.getElementById('countdown').textContent = "It's time to sleep!";
+                    return;
+                }
+
+                const hours = Math.floor((milliseconds / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((milliseconds / (1000 * 60)) % 60);
+                const seconds = Math.floor((milliseconds / 1000) % 60);
+
+                document.getElementById('countdown').textContent =
+                    `${hours.toString().padStart(2, '0')}h : ${minutes.toString().padStart(2, '0')}m : ${seconds.toString().padStart(2, '0')}s`;
+            }, 1000);
+        }
+    </script>
+
+</body>
+</html>
